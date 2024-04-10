@@ -1,6 +1,6 @@
 <?php
 
-namespace MadBit\PtCommandGenerator;
+namespace MadBit\PtCommandGenerator\Exceptions;
 
 use Exception;
 

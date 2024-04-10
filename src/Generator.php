@@ -2,6 +2,7 @@
 
 namespace MadBit\PtCommandGenerator;
 
+use MadBit\PtCommandGenerator\Exceptions\ParserException;
 use PhpMyAdmin\SqlParser\Components\AlterOperation;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\AlterStatement;

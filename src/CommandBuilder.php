@@ -2,11 +2,18 @@
 
 namespace MadBit\PtCommandGenerator;
 
+use MadBit\PtCommandGenerator\Utils\StringUtils;
+
 class CommandBuilder
 {
     private string $table;
     private array $operations = [];
     private bool $dryRun = true;
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
 
     public function setTable(string $table): CommandBuilder
     {
@@ -22,11 +29,27 @@ class CommandBuilder
         return $this;
     }
 
+    public function getOperations(): array
+    {
+        return $this->operations;
+    }
+
+    public function isDryRun(): bool
+    {
+        return $this->dryRun;
+    }
+
+    public function setDryRun(bool $dryRun): CommandBuilder
+    {
+        $this->dryRun = $dryRun;
+        return $this;
+    }
+
     public function build(): string
     {
         $action = $this->dryRun ? 'dry-run' : 'execute';
         $table = $this->table;
-        $operations = $this->encodeDoubleQuotedArgument(implode(', ', $this->operations));
+        $operations = StringUtils::encodeDoubleQuotedArgument(implode(', ', $this->operations));
 
         $options = [
             $action => null,
@@ -41,24 +64,5 @@ class CommandBuilder
         }, array_keys($options), $options));
 
         return 'pt-online-schema-change ' . $optionsString . ' h=$HOST,D=$DBNAME,t=' . $table . ',u=$DBUSERNAME,p=$DBPWD';
-    }
-
-    private function encodeDoubleQuotedArgument(string $argument): string
-    {
-        $transformations = [
-            '"' => '\"',
-            '`' => '\`',
-            '!' => '\!',
-            '$' => '\$',
-            "\n" => '',
-            "\r" => '',
-            "\t" => '',
-        ];
-
-        return str_replace(
-            array_keys($transformations),
-            array_values($transformations),
-            $argument
-        );
     }
 }
