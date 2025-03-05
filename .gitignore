@@ -93,3 +93,4 @@ fabric.properties
 
 /vendor
 .php-cs-fixer.cache
+.DS_Store
