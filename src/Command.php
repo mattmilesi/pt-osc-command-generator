@@ -10,74 +10,10 @@ class Command
     public const MODE_DRY_RUN = 'dry-run';
     public const MODE_EXECUTE = 'execute';
 
-    private string $host = '';
-    private string $database = '';
-    private string $table = '';
-    private string $user = '';
-    private string $password = '';
     private array $operations = [];
     private array $options = [];
+    private array $dsnOptions = [];
     private string $mode = self::MODE_DRY_RUN;
-
-    public function getHost(): string
-    {
-        return $this->host;
-    }
-
-    public function setHost(string $host): Command
-    {
-        $this->host = $host;
-
-        return $this;
-    }
-
-    public function getDatabase(): string
-    {
-        return $this->database;
-    }
-
-    public function setDatabase(string $database): Command
-    {
-        $this->database = $database;
-
-        return $this;
-    }
-
-    public function getTable(): string
-    {
-        return $this->table;
-    }
-
-    public function setTable(string $table): Command
-    {
-        $this->table = $table;
-
-        return $this;
-    }
-
-    public function getUser(): string
-    {
-        return $this->user;
-    }
-
-    public function setUser(string $user): Command
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): Command
-    {
-        $this->password = $password;
-
-        return $this;
-    }
 
     public function addOperation(string $operation): Command
     {
@@ -98,21 +34,54 @@ class Command
 
     public function setOption(string $option, string $value = ''): Command
     {
-        // TODO: validate options
+        if (!Option::isValid($option)) {
+            throw new InvalidArgumentException("Invalid option '$option'");
+        }
         $this->options[$option] = $value;
         return $this;
     }
 
     public function unsetOption(string $option): Command
     {
-        // TODO: validate options
+        if (!Option::isValid($option)) {
+            throw new InvalidArgumentException("Invalid option '$option'");
+        }
         unset($this->options[$option]);
         return $this;
     }
 
     public function getOption(string $option): ?string
     {
+        if (!Option::isValid($option)) {
+            throw new InvalidArgumentException("Invalid option '$option'");
+        }
         return $this->options[$option] ?? null;
+    }
+
+    public function setDsnOption(string $dsnOption, string $value = ''): Command
+    {
+        if (!DsnOption::isValid($dsnOption)) {
+            throw new InvalidArgumentException("Invalid DSN option '$dsnOption'");
+        }
+        $this->dsnOptions[$dsnOption] = $value;
+        return $this;
+    }
+
+    public function unsetDsnOption(string $dsnOption): Command
+    {
+        if (!DsnOption::isValid($dsnOption)) {
+            throw new InvalidArgumentException("Invalid DSN option '$dsnOption'");
+        }
+        unset($this->dsnOptions[$dsnOption]);
+        return $this;
+    }
+
+    public function getDsnOption(string $dsnOption): ?string
+    {
+        if (!DsnOption::isValid($dsnOption)) {
+            throw new InvalidArgumentException("Invalid DSN option '$dsnOption'");
+        }
+        return $this->dsnOptions[$dsnOption] ?? null;
     }
 
     public function setMode(string $mode): Command
@@ -157,20 +126,27 @@ class Command
             return ($fancy ? "\n    " : '') . "--{$key}" . ($value ? " {$value}" : '');
         }, array_keys($this->options), $this->options));
 
-        $password = $showPassword ? $this->password : '********';
-        return "pt-online-schema-change " . $optionsString . ($fancy ? "\n    " : ' ') . "h={$this->host},D={$this->database},t={$this->table},u={$this->user},p={$password}";
+        $dsnOptionsString = implode(',', array_map(function ($key, $value) use ($showPassword) {
+            if (!$showPassword && $key === DsnOption::PASSWORD) {
+                $value = '******';
+            }
+            return "{$key}={$value}";
+        }, array_keys($this->dsnOptions), $this->dsnOptions));
+
+        $separator = $fancy ? "\n    " : ' ';
+        return "pt-online-schema-change{$separator}{$optionsString}{$separator}{$dsnOptionsString}";
     }
 
     public function toArray(bool $showPassword = false): array
     {
+        $dsnOptions = $this->dsnOptions;
+        if (!$showPassword) {
+            $dsnOptions[DsnOption::PASSWORD] = '******';
+        }
         return [
-            'host' => $this->host,
-            'database' => $this->database,
-            'table' => $this->table,
-            'user' => $this->user,
-            'password' => $showPassword ? $this->password : '********',
             'operations' => $this->operations,
             'options' => $this->options,
+            'dsnOptions' => $dsnOptions,
             'mode' => $this->mode,
         ];
     }

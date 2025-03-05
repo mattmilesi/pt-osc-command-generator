@@ -45,7 +45,7 @@ class StatementParser
                 throw new ParserException("Invalid table name in statement #{$i}");
             }
             $command = new Command();
-            $command->setTable($table);
+            $command->setDsnOption(DsnOption::TABLE, $table);
             foreach ($statement->altered as $operation) {
                 $command->addOperation(AlterOperation::build($operation));
             }

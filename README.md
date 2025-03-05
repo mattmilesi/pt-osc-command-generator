@@ -16,10 +16,10 @@ composer require mattmilesi/pt-osc-command-generator
 $query = "ALTER TABLE customers ADD COLUMN middle_name VARCHAR(255) NOT NULL AFTER first_name;";
 $parser = new \PtOscCommandGenerator\StatementParser($query);
 $command = $parser->getCommands()[0]
-    ->setHost('<host>')
-    ->setDatabase('<database>')
-    ->setUser('<user>')
-    ->setPassword('<password>')
+    ->setDsnOption(\PtOscCommandGenerator\DsnOption::HOST, '<host>')
+    ->setDsnOption(\PtOscCommandGenerator\DsnOption::DATABASE, '<database>')
+    ->setDsnOption(\PtOscCommandGenerator\DsnOption::USER, '<user>')
+    ->setDsnOption(\PtOscCommandGenerator\DsnOption::PASSWORD, '<password>')
     ->setExecuteMode();
 $cliCommand = (string)$command;
 

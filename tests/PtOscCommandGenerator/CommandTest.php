@@ -6,11 +6,11 @@ use PHPUnit\Framework\TestCase;
 
 class CommandTest extends TestCase
 {
-    public function testSetTable(): void
+    public function testSetDsnOption(): void
     {
         $builder = new Command();
-        $builder->setTable('customers');
-        $this->assertEquals('customers', $builder->getTable());
+        $builder->setDsnOption(DsnOption::TABLE, 'customers');
+        $this->assertEquals('customers', $builder->getDsnOption(DsnOption::TABLE));
     }
 
     public function testAddOperation(): void
@@ -24,17 +24,17 @@ class CommandTest extends TestCase
     public function testToString(): void
     {
         $command = (new Command())
-            ->setHost('$HOST')
-            ->setDatabase('$DATABASE')
-            ->setTable('customers')
-            ->setUser('$USER')
-            ->setPassword('$PASSWORD')
+            ->setDsnOption(DsnOption::HOST, '$HOST')
+            ->setDsnOption(DsnOption::DATABASE, '$DATABASE')
+            ->setDsnOption(DsnOption::TABLE, 'customers')
+            ->setDsnOption(DsnOption::USER, '$USER')
+            ->setDsnOption(DsnOption::PASSWORD, '$PASSWORD')
             ->addOperation('ADD column a INT')
             ->addOperation('ADD column b VARCHAR(255)')
             ->setDryRunMode();
 
         $this->assertEquals(
-            'pt-online-schema-change --dry-run --alter "ADD column a INT, ADD column b VARCHAR(255)" h=$HOST,D=$DATABASE,t=customers,u=$USER,p=********',
+            'pt-online-schema-change --dry-run --alter "ADD column a INT, ADD column b VARCHAR(255)" h=$HOST,D=$DATABASE,t=customers,u=$USER,p=******',
             $command->toString()
         );
     }
@@ -42,16 +42,16 @@ class CommandTest extends TestCase
     public function testToStringWithExecuteAndOptions(): void
     {
         $command = (new Command())
-            ->setHost('$HOST')
-            ->setDatabase('$DATABASE')
-            ->setTable('customers')
-            ->setUser('$USER')
-            ->setPassword('$PASSWORD')
+            ->setDsnOption(DsnOption::HOST, '$HOST')
+            ->setDsnOption(DsnOption::DATABASE, '$DATABASE')
+            ->setDsnOption(DsnOption::TABLE, 'customers')
+            ->setDsnOption(DsnOption::USER, '$USER')
+            ->setDsnOption(DsnOption::PASSWORD, '$PASSWORD')
+            ->setOption(Option::RECURSION_METHOD, 'none')
+            ->setOption(Option::PROGRESS, 'percentage,1')
+            ->setOption(Option::NO_DROP_OLD_TABLE)
             ->addOperation('ADD column a INT')
             ->addOperation('ADD column b VARCHAR(255)')
-            ->setOption('recursion-method', 'none')
-            ->setOption('progress', 'percentage,1')
-            ->setOption('no-drop-old-table')
             ->setExecuteMode();
 
         $this->assertEquals(
@@ -63,25 +63,20 @@ class CommandTest extends TestCase
     public function testToArrayWithOptions(): void
     {
         $command = (new Command())
-            ->setHost('$HOST')
-            ->setDatabase('$DATABASE')
-            ->setTable('customers')
-            ->setUser('$USER')
-            ->setPassword('$PASSWORD')
+            ->setDsnOption(DsnOption::HOST, '$HOST')
+            ->setDsnOption(DsnOption::DATABASE, '$DATABASE')
+            ->setDsnOption(DsnOption::TABLE, 'customers')
+            ->setDsnOption(DsnOption::USER, '$USER')
+            ->setDsnOption(DsnOption::PASSWORD, '$PASSWORD')
+            ->setOption(Option::RECURSION_METHOD, 'none')
+            ->setOption(Option::PROGRESS, 'percentage,1')
+            ->setOption(Option::NO_DROP_OLD_TABLE)
             ->addOperation('ADD column a INT')
             ->addOperation('ADD column b VARCHAR(255)')
-            ->setOption('recursion-method', 'none')
-            ->setOption('progress', 'percentage,1')
-            ->setOption('no-drop-old-table')
             ->setMode(Command::MODE_DRY_RUN);
 
         $this->assertEquals(
             [
-                'host' => '$HOST',
-                'database' => '$DATABASE',
-                'table' => 'customers',
-                'user' => '$USER',
-                'password' => '********',
                 'operations' => [
                     'ADD column a INT',
                     'ADD column b VARCHAR(255)',
@@ -91,6 +86,13 @@ class CommandTest extends TestCase
                     'progress' => 'percentage,1',
                     'no-drop-old-table' => '',
 
+                ],
+                'dsnOptions' => [
+                    'h' => '$HOST',
+                    'D' => '$DATABASE',
+                    't' => 'customers',
+                    'u' => '$USER',
+                    'p' => '******',
                 ],
                 'mode' => 'dry-run',
             ],
