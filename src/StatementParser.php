@@ -7,10 +7,11 @@ use PhpMyAdmin\SqlParser\Components\AlterOperation;
 use PhpMyAdmin\SqlParser\Parser;
 use PhpMyAdmin\SqlParser\Statements\AlterStatement;
 
-class Generator
+class StatementParser
 {
     private string $input;
     private Parser $parser;
+    /** @var Command[] */
     private array $commands = [];
 
     /**
@@ -43,12 +44,12 @@ class Generator
             if (empty($table)) {
                 throw new ParserException("Invalid table name in statement #{$i}");
             }
-            $builder = new CommandBuilder();
-            $builder->setTable($table);
+            $command = new Command();
+            $command->setTable($table);
             foreach ($statement->altered as $operation) {
-                $builder->addOperation(AlterOperation::build($operation));
+                $command->addOperation(AlterOperation::build($operation));
             }
-            $this->commands[] = $builder->build();
+            $this->commands[] = $command;
 
             $i++;
         }

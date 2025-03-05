@@ -13,14 +13,18 @@ composer require mattmilesi/pt-osc-command-generator
 ## Usage
 
 ```PHP
-use PtOscCommandGenerator\Generator;
-
 $query = "ALTER TABLE customers ADD COLUMN middle_name VARCHAR(255) NOT NULL AFTER first_name;";
-$generator = new Generator($query);
-$commands = $generator->getCommands();
+$parser = new \PtOscCommandGenerator\StatementParser($query);
+$command = $parser->getCommands()[0]
+    ->setHost('<host>')
+    ->setDatabase('<database>')
+    ->setUser('<user>')
+    ->setPassword('<password>')
+    ->setExecuteMode();
+$cliCommand = (string)$command;
 
-# $commands will be an array of strings, each one representing a command to be executed
-# $commands[0]: pt-online-schema-change --alter "ADD COLUMN middle_name VARCHAR(255) NOT NULL AFTER first_name" h=$HOST,D=$DBNAME,t=customers,u=$DBUSERNAME,p=$DBPWD
+# getCommands returns an array of Command, each one representing a command to be executed
+# $cliCommand: pt-online-schema-change --execute --alter "ADD COLUMN middle_name VARCHAR(255) NOT NULL AFTER first_name" h=<host>,D=<database>,t=customers,u=<user>,p=<password>
 ```
 
 ## License  
