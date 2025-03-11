@@ -122,8 +122,8 @@ class Command
             ['alter' => '"' . $operations . '"']
         );
 
-        $optionsString = implode(' ', array_map(function ($key, $value) use ($fancy) {
-            return ($fancy ? "\n    " : '') . "--{$key}" . ($value ? " {$value}" : '');
+        $optionsString = implode($fancy ? "\n    " : ' ', array_map(function ($key, $value) use ($fancy) {
+            return "--{$key}" . ($value ? " {$value}" : '');
         }, array_keys($this->options), $this->options));
 
         $dsnOptionsString = implode(',', array_map(function ($key, $value) use ($showPassword) {

@@ -1,7 +1,7 @@
 {
   "name": "mattmilesi/pt-osc-command-generator",
   "description": "Generates pt-online-schema-change commands for MySQL, given the ALTER TABLE query",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "Apache-2.0",
   "type": "library",
   "require": {
